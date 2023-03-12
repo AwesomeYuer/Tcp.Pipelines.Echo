@@ -6,8 +6,6 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
-
-
         
 var listenerSocket = new Socket(SocketType.Stream, ProtocolType.Tcp);
 listenerSocket.Bind(new IPEndPoint(IPAddress.Any, 8087));
