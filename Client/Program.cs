@@ -3,21 +3,25 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 
-var clientSocket = new Socket(SocketType.Stream, ProtocolType.Tcp);
+using Socket clientSocket = new Socket(SocketType.Stream, ProtocolType.Tcp);
 
 Console.WriteLine("Connecting to port 8087");
 
 clientSocket.Connect(new IPEndPoint(IPAddress.Loopback, 8087));
-var stream = new NetworkStream(clientSocket);
+await using var stream = new NetworkStream(clientSocket);
+
+// like telnet client mode
 
 // run async
 _ = OnReadProcessAsync();
 
+using var standardInput = Console.OpenStandardInput();
+
 // run sync
-await Console.OpenStandardInput().CopyToAsync(stream);
+await standardInput.CopyToAsync(stream);
 
 async Task OnReadProcessAsync()
 {
-    var standardOutput = Console.OpenStandardOutput();
+    using var standardOutput = Console.OpenStandardOutput();
     await stream!.CopyToAsync(standardOutput);
 }

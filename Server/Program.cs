@@ -40,23 +40,26 @@ static async Task ProcessLinesAsync(Socket socket)
             // Process the line.
             ProcessLine(line);
 
+            var l = line.Length;
+
             await networkStream
                         .WriteAsync
                                 (
                                     Encoding
                                             .UTF8
-                                            .GetBytes("server received:\r\n")
+                                            .GetBytes("server received line: [")
                                             .Concat
                                                 (
-                                                    line.ToArray()
+                                                    line.Slice(0, l - 1).ToArray()
                                                 )
                                             .Concat
                                                 (
-                                                    new byte[] { (byte) '\n' }
+                                                    new byte[] { (byte) ']', (byte) '\n' }
                                                 )
                                             .ToArray()
                                 );
-            await networkStream.FlushAsync();
+            await networkStream
+                            .FlushAsync();
 
         }
 
