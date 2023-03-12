@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace TcpEcho
@@ -18,6 +19,17 @@ namespace TcpEcho
 
             clientSocket.Connect(new IPEndPoint(IPAddress.Loopback, 8087));
             var stream = new NetworkStream(clientSocket);
+            var newLine = new ReadOnlyMemory<byte>(new byte[] { (byte)'\n' });
+            new Thread
+                    (
+                        async () =>
+                        {
+                            var standardOutput = Console.OpenStandardOutput();
+                            await stream.CopyToAsync(standardOutput);
+                            Console.CursorTop++;
+                        }
+                    )
+                    .Start();
 
             await Console.OpenStandardInput().CopyToAsync(stream);
         }

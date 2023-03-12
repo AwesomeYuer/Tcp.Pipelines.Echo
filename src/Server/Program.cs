@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Buffers;
 using System.IO.Pipelines;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -43,6 +44,25 @@ namespace Server
                 {
                     // Process the line.
                     ProcessLine(line);
+
+                    await stream
+                                .WriteAsync
+                                        (
+                                            Encoding
+                                                    .UTF8
+                                                    .GetBytes("server received:\r\n")
+                                                    .Concat
+                                                        (
+                                                            line.ToArray()
+                                                        )
+                                                    .Concat
+                                                        (
+                                                            new byte[] { (byte) '\n' }
+                                                        )
+                                                    .ToArray()
+                                        );
+                    await stream.FlushAsync();
+
                 }
 
                 // Tell the PipeReader how much of the buffer has been consumed.
@@ -82,11 +102,7 @@ namespace Server
         {
             foreach (var segment in buffer)
             {
-#if NETCOREAPP2_1
                 Console.Write(Encoding.UTF8.GetString(segment.Span));
-#else
-                Console.Write(Encoding.UTF8.GetString(segment));
-#endif
             }
             Console.WriteLine();
         }
